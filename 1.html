@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My first three.js app</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <!-- Please download file "three.min.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.min.js -->
+        <script src="./three.min.js"></script>
+        <script>
+            var scene, renderer, camera;
+            var lines;
+
+            function init() {
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+
+                scene = new THREE.Scene();
+                {
+                    var points = [];
+                    points.push(new THREE.Vector3(-20, 0, 0));
+                    points.push(new THREE.Vector3(0, 20, 0));
+                    points.push(new THREE.Vector3(20, 0, 0));
+                    points.push(new THREE.Vector3(-20, 0, 0));
+
+                    var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    var material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth:2 });
+
+                    lines = new THREE.Line(geometry, material);
+                    scene.add(lines);
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                lines.rotation.x += 0.01;
+                lines.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+            }
+
+            init();
+            animate();
+        </script>
+    </body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My first three.js app</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <!-- Please download file "three.min.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.min.js -->
+        <script src="./three.min.js"></script>
+        <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
+        <script src="./OrbitControls.js"></script>
+        <!-- Please download file "Vector3.js" from https://github.com/mrdoob/three.js/blob/master/src/math/Vector3.js -->
+        <script src="./Vector3.js"></script>
+        <!-- Please download file "Quaternion.js" from https://github.com/mrdoob/three.js/blob/master/src/math/Quaternion.js -->
+        <script src="./Quaternion.js"></script>
+        <script>
+            var scene, renderer, camera, controls;
+            var turtle_x = 0, turtle_y = 0, turtle_z = 0;
+            var turtle_dx = 0, turtle_dy = 0, turtle_dz = 0, turtle_spin = 0;
+            var pen_on = true;
+
+            function add_line(x0, y0, z0, x1, y1, z1) {
+                var points = [];
+                points.push(new THREE.Vector3(x0, y0, z0));
+                points.push(new THREE.Vector3(x1, y1, z1));
+
+                var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                var material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+                var line = new THREE.Line(geometry, material);
+                scene.add(line);
+            }
+            function set_pos(x, y, z=0) {
+                turtle_x = x;
+                turtle_y = y;
+                turtle_z = z;
+            }
+            function set_dir(dx, dy, dz=0) {
+                r = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                turtle_dx = dx / r;
+                turtle_dy = dy / r;
+                turtle_dz = dz / r;
+            }
+            function walk(r) {
+                var x0 = turtle_x, y0 = turtle_y, z0 = turtle_z;
+                turtle_x += r * turtle_dx;
+                turtle_y += r * turtle_dy;
+                turtle_z += r * turtle_dz;
+                if (pen_on)
+                    add_line(x0, y0, z0, turtle_x, turtle_y, turtle_z);
+            }
+            function turn_dir(dx, dy, dz=0) {
+                var axis = new THREE.Vector3(1, 0, 0);
+                var v0 = new THREE.Vector3(turtle_dx, turtle_dy, turtle_dz);
+                var v1 = new THREE.Vector3(dx, dy, dz);
+                var q0 = new THREE.Quaternion();
+                var q1 = new THREE.Quaternion();
+                q0.setFromUnitVectors(axis, v0);
+                q1.setFromUnitVectors(axis, v1);
+                q1.multiply(q0);
+                axis.applyQuaternion(q1);
+                axis.normalize();
+                set_dir(axis.x, axis.y, axis.z);
+            }
+            function add_spin(delta) {
+                turtle_spin += delta;
+            }
+            function turn_angle(angle1, angle2=0) {
+                var dx = Math.cos(angle1 * Math.PI / 180);
+                var dy = Math.sin(angle1 * Math.PI / 180);
+                angle2 += turtle_spin;
+                var dz = dy * Math.sin(angle2 * Math.PI / 180);
+                dy *= Math.cos(angle2 * Math.PI / 180);
+                turn_dir(dx, dy, dz);
+            }
+            function init() {
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                controls.enableZoom = true;
+                controls.autoRotate = true;
+
+                scene = new THREE.Scene();
+                scene.add(new THREE.AxisHelper(50));
+            }
+            function koch(degree, step) {
+                if (degree == 0) {
+                    walk(step);
+                } else {
+                    koch(degree - 1, step/3);
+                    turn_angle(60);
+                    koch(degree - 1, step/3);
+                    turn_angle(-120);
+                    koch(degree - 1, step/3);
+                    turn_angle(60);
+                    koch(degree - 1, step/3);
+                }
+            }
+            function tree(size, angle, depth) {
+                if (depth == 0)
+                    return;
+                walk(size);
+                turn_angle(angle);
+                tree(size * 0.75, angle, depth - 1);
+                turn_angle(-2 * angle);
+                tree(size * 0.75, angle, depth - 1);
+                turn_angle(angle);
+                walk(-size);
+            }
+            function draw() {
+                set_pos(0, 0, 0);
+                set_dir(0, 100, 0);
+                koch(6, 50);
+                set_pos(0, 0, 0);
+                set_dir(0, 100, 100);
+                tree(10, 40, 10);
+            }
+            function animate() {
+                controls.update();
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            init();
+            draw();
+            animate();
+        </script>
+    </body>
+</html>

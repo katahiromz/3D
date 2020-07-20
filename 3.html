@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My first three.js app</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <!-- Please download file "three.min.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.min.js -->
+        <script src="./three.min.js"></script>
+        <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
+        <script src="./OrbitControls.js"></script>
+        <script>
+            var scene, renderer, camera, controls;
+            var turtle_x = 0, turtle_y = 0, turtle_z = 0;
+            var turtle_dx = 0, turtle_dy = 0, turtle_dz = 0;
+            var pen_on = true;
+
+            function add_line(x0, y0, z0, x1, y1, z1) {
+                var points = [];
+                points.push(new THREE.Vector3(x0, y0, z0));
+                points.push(new THREE.Vector3(x1, y1, z1));
+
+                var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                var material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+                var line = new THREE.Line(geometry, material);
+                scene.add(line);
+            }
+            function set_pos(x, y, z) {
+                turtle_x = x;
+                turtle_y = y;
+                turtle_z = z;
+            }
+            function set_dir(dx, dy, dz) {
+                r = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                turtle_dx = dx / r;
+                turtle_dy = dy / r;
+                turtle_dz = dz / r;
+            }
+            function walk(delta) {
+                var x0 = turtle_x, y0 = turtle_y, z0 = turtle_z;
+                turtle_x += delta * turtle_dx;
+                turtle_y += delta * turtle_dy;
+                turtle_z += delta * turtle_dz;
+                if (pen_on)
+                    add_line(x0, y0, z0, turtle_x, turtle_y, turtle_z);
+            }
+            function turn_dir(dx, dy, dz) {
+                // Ignoring dz.
+                // (a + b*i) * (c + d*i) == (a*c - b*d) + (b*c + d*a).
+                // a == dx0, b == dy0, c == dx, d == dy.
+                var dx0 = turtle_dx, dy0 = turtle_dy, dz0 = turtle_dz;
+                turtle_dx = dx0 * dx - dy0 * dy;
+                turtle_dy = dy0 * dx + dy * dx0;
+            }
+            function turn_angle(angle) {
+                turn_dir(Math.cos(angle * Math.PI / 180), Math.sin(angle * Math.PI / 180), 0);
+            }
+            function init() {
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                controls.enableZoom = true;
+                controls.autoRotate = true;
+
+                scene = new THREE.Scene();
+                scene.add(new THREE.AxisHelper(50));
+            }
+            function koch(degree, step) {
+                if (degree == 0) {
+                    walk(step);
+                } else {
+                    koch(degree - 1, step/3);
+                    turn_angle(60);
+                    koch(degree - 1, step/3);
+                    turn_angle(-120);
+                    koch(degree - 1, step/3);
+                    turn_angle(60);
+                    koch(degree - 1, step/3);
+                }
+            }
+            function draw() {
+                set_pos(0, 0, 0);
+                set_dir(100, 0, 0);
+                koch(6, 75);
+            }
+            function animate() {
+                controls.update();
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            init();
+            draw();
+            animate();
+        </script>
+    </body>
+</html>
