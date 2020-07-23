@@ -14,13 +14,16 @@
         <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
         <script src="./OrbitControls.js"></script>
         <script>
+            // ラジアンから度へ変換する関数。
             function rad2deg(rad) {
                 return rad * 180.0 / Math.PI;
             }
+            // 度からラジアンへ変換する関数。
             function deg2rad(degree) {
                 return degree * Math.PI / 180.0;
             }
 
+            // 三次元タートルグラフィックス。
             function Turtle3D(scene) {
                 this.scene = scene;
                 this.position = new THREE.Vector3();
@@ -29,28 +32,33 @@
                 this.fill_color = 0x888888;
                 this.gyro = new THREE.Matrix3();
 
+                // 位置をリセットする関数。
                 this.reset_pos = function() {
                     this.position = new THREE.Vector3();
                 };
+                // X軸の方向を見る関数。
                 this.look_x = function() {
                     this.gyro.set(
                         1, 0, 0,
-                        0, 1, 0,
-                        0, 0, 1);
+                        0, 0, 1,
+                        0, 1, 0);
                 };
+                // Y軸の方向を見る関数。
                 this.look_y = function() {
                     this.gyro.set(
                         0, 1, 0,
                         1, 0, 0,
                         0, 0, 1);
                 };
+                // Z軸の方向を見る関数。
                 this.look_z = function() {
                     this.gyro.set(
+                        0, -1, 0,
                         0, 0, 1,
-                        0, 1, 0,
                         1, 0, 0);
                 };
 
+                // リセットする関数。
                 this.reset = function() {
                     this.reset_pos();
                     this.look_y();
@@ -59,22 +67,27 @@
                 };
                 this.reset();
 
+                // 位置を取得・セットする関数。
                 this.get_pos = function() {
                     return this.position.clone();
                 }
                 this.set_pos = function(x, y, z) {
                     this.position = new THREE.Vector3(x, y, z);
                 }
+
+                // 向きを取得する関数。
                 this.get_dir = function() {
                     return new THREE.Vector3(
                         this.gyro.elements[0],
                         this.gyro.elements[1],
                         this.gyro.elements[2]);
                 }
+                // ジャイロを取得する関数。
                 this.get_gyro = function() {
                     return this.gyro.clone();
                 }
 
+                // 線を追加する関数。
                 this.add_lines = function(vertices, line_color = this.line_color) {
                     var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
                     var material = new THREE.LineBasicMaterial({ color: line_color });
@@ -87,6 +100,7 @@
                     points.push(pos1);
                     this.add_lines(points, line_color);
                 }
+                // 三角形を追加する関数。
                 this.add_triangle = function(pos0, pos1, pos2, fill_color = this.fill_color) {
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(pos0);
@@ -97,6 +111,8 @@
                     var triangle = new THREE.Mesh(geometry, material);
                     this.scene.add(triangle);
                 }
+
+                // 長さdistanceだけ前進する。enable_penがtrueなら線を描画する。
                 this.walk = function(distance) {
                     var dir = this.get_dir();
                     if (this.enable_pen) {
@@ -108,8 +124,10 @@
                         this.position.addScaledVector(dir, distance);
                     }
                 }
-                this.turn = function(degree) {
-                    var rad = deg2rad(degree);
+
+                // 亀の右手方向にangle度曲がる関数。マイナスは左手方向。
+                this.turn = function(angle) {
+                    var rad = deg2rad(angle);
                     var rot = new THREE.Matrix3();
                     rot.set(
                         Math.cos(rad), -Math.sin(rad), 0,
@@ -117,17 +135,10 @@
                         0, 0, 1);
                     this.gyro.multiply(rot);
                 }
-                this.pitch = function(degree) {
-                    var rad = deg2rad(degree);
-                    var rot = new THREE.Matrix3();
-                    rot.set(
-                        Math.cos(rad), 0, -Math.sin(rad),
-                        0, 1, 0,
-                        Math.sin(rad), 0, Math.cos(rad));
-                    this.gyro.multiply(rot);
-                }
-                this.bank = function(degree) {
-                    var rad = deg2rad(degree);
+
+                // 亀の進行方向を軸として反時計回りにangle度曲がる関数。マイナスは時計回り。
+                this.bank = function(angle) {
+                    var rad = deg2rad(angle);
                     var rot = new THREE.Matrix3();
                     rot.set(
                         1, 0, 0,
@@ -135,13 +146,28 @@
                         0, Math.sin(rad), Math.cos(rad));
                     this.gyro.multiply(rot);
                 }
+
+                // 亀のお辞儀方向にangle度曲がる関数。
+                this.pitch = function(angle) {
+                    var rad = deg2rad(angle);
+                    var rot = new THREE.Matrix3();
+                    rot.set(
+                        Math.cos(rad), 0, Math.sin(rad),
+                        0, 1, 0,
+                        -Math.sin(rad), 0, Math.cos(rad));
+                    this.gyro.multiply(rot);
+                }
+
+                // 180度回転する関数。
                 this.look_back = function() {
                     this.turn(180);
                 }
             }
 
+            // グローバル変数。
             var scene, renderer, camera, controls, turtle;
 
+            // 全体の初期化処理。
             function init() {
                 renderer = new THREE.WebGLRenderer();
                 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -162,20 +188,24 @@
 
                 turtle = new Turtle3D(scene);
             }
-            function koch(degree, step) {
-                if (degree == 0) {
+
+            // コッホ曲線を描画する。
+            function koch(level, step) {
+                if (level == 0) {
                     turtle.walk(step);
                 } else {
-                    koch(degree - 1, step/3);
-                    turtle.turn(60);
-                    koch(degree - 1, step/3);
-                    turtle.turn(-120);
-                    koch(degree - 1, step/3);
-                    turtle.turn(60);
-                    koch(degree - 1, step/3);
+                    koch(level - 1, step/3);
+                    turtle.pitch(-60);
+                    koch(level - 1, step/3);
+                    turtle.pitch(120);
+                    koch(level - 1, step/3);
+                    turtle.pitch(-60);
+                    koch(level - 1, step/3);
                 }
             }
-            function tree(size, angle, depth) {
+
+            // 二次元の木構造を描画する。
+            function tree(size, depth, angle) {
                 if (depth == 0)
                     return;
                 turtle.walk(size);
@@ -186,35 +216,52 @@
                 turtle.turn(angle);
                 turtle.walk(-size);
             }
-            function tree3(size, angle1, depth, angle2=0) {
+
+            // 三脚のように三方向に分かれる木構造を描画する。
+            function tree3(size, depth, angle) {
                 if (depth == 0)
 	                return;
                 turtle.walk(size);
-                turtle.pitch(angle2);
-                tree3(size * 0.75, angle1, depth - 1, angle2);
-                turtle.pitch(-angle2);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle);
                 turtle.bank(120);
-                turtle.pitch(angle2);
-                tree3(size * 0.75, angle1, depth - 1, angle2);
-                turtle.pitch(-angle2);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle);
                 turtle.bank(-240);
-                turtle.pitch(angle2);
-                tree3(size * 0.75, angle1, depth - 1, angle2);
-                turtle.pitch(-angle2);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle);
                 turtle.bank(120);
                 turtle.walk(-size);
             }
+
+            // 全体の描画処理。
             function draw() {
-                turtle.set_pos(0, 0, 0);
+                turtle.reset();
                 turtle.look_x();
                 turtle.line_color = 0x00FF00;
                 koch(5, 50);
+
+                //turtle.reset();
+                //turtle.look_y();
+                //turtle.line_color = 0xFF0000;
+                //tree(10, 6, 20);
+
                 turtle.reset();
-                turtle.set_pos(0, 0, 0);
                 turtle.look_y();
                 turtle.line_color = 0xFF0000;
-                tree3(10, 40, 8, 40);
+                tree3(10, 8, 40);
+
+                //turtle.reset();
+                //turtle.look_y();
+                //turtle.walk(20);
+                //turtle.turn(90);
+                //turtle.walk(20);
             }
+
+            // 全体のアニメーション処理。
             function animate() {
                 controls.update();
                 requestAnimationFrame(animate);
