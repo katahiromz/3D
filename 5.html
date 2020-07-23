@@ -28,6 +28,10 @@
                 this.line_color = 0xffffff;
                 this.fill_color = 0x888888;
                 this.gyro = new THREE.Matrix3();
+
+                this.reset_pos = function() {
+                    this.position = new THREE.Vector3();
+                };
                 this.look_x = function() {
                     this.gyro.set(
                         1, 0, 0,
@@ -46,15 +50,15 @@
                         0, 1, 0,
                         1, 0, 0);
                 };
-                this.reset_pos = function() {
-                    this.position = new THREE.Vector3();
-                };
+
                 this.reset = function() {
                     this.reset_pos();
                     this.look_y();
 	                this.line_color = 0xffffff;
+	                this.fill_color = 0x888888;
                 };
                 this.reset();
+
                 this.get_pos = function() {
                     return this.position.clone();
                 }
@@ -79,7 +83,7 @@
                     points.push(pos1);
                     this.add_lines(points, line_color);
                 }
-                this.add_triangle = function(pos0, pos1, pos2, fill_color = this.line_color) {
+                this.add_triangle = function(pos0, pos1, pos2, fill_color = this.fill_color) {
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(pos0);
                     geometry.vertices.push(pos1);
