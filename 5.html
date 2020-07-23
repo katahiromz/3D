@@ -210,9 +210,9 @@
                     return;
                 turtle.walk(size);
                 turtle.turn(angle);
-                tree(size * 0.75, angle, depth - 1);
-                turtle.turn(-2 * angle);
-                tree(size * 0.75, angle, depth - 1);
+                tree(size * 0.75, depth - 1, angle);
+                turtle.turn(-2.0 * angle);
+                tree(size * 0.75, depth - 1, angle);
                 turtle.turn(angle);
                 turtle.walk(-size);
             }
@@ -247,7 +247,7 @@
                 //turtle.reset();
                 //turtle.look_y();
                 //turtle.line_color = 0xFF0000;
-                //tree(10, 6, 20);
+                //tree(7, 8, 30);
 
                 turtle.reset();
                 turtle.look_y();
