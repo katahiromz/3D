@@ -71,6 +71,10 @@
                         this.gyro.elements[1],
                         this.gyro.elements[2]);
                 }
+                this.get_gyro = function() {
+                    return this.gyro.clone();
+                }
+
                 this.add_lines = function(vertices, line_color = this.line_color) {
                     var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
                     var material = new THREE.LineBasicMaterial({ color: line_color });
