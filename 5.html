@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>My first three.js app</title>
+        <title>My three.js app</title>
         <style>
             body { margin: 0; }
             canvas { display: block; }
@@ -14,27 +14,72 @@
         <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
         <script src="./OrbitControls.js"></script>
         <script>
-            var rad2deg = function(rad) {
+            function rad2deg(rad) {
                 return rad * 180.0 / Math.PI;
             }
-            var deg2rad = function(degree) {
+            function deg2rad(degree) {
                 return degree * Math.PI / 180.0;
             }
 
-            function Turtle3DRenderer() {
-                this.add_lines = function(vertices, line_color = 0xffffff) {
+            function Turtle3D(scene) {
+                this.scene = scene;
+                this.position = new THREE.Vector3();
+                this.enable_pen = true;
+                this.line_color = 0xffffff;
+                this.fill_color = 0x888888;
+                this.gyro = new THREE.Matrix3();
+                this.look_x = function() {
+                    this.gyro.set(
+                        1, 0, 0,
+                        0, 1, 0,
+                        0, 0, 1);
+                };
+                this.look_y = function() {
+                    this.gyro.set(
+                        0, 1, 0,
+                        1, 0, 0,
+                        0, 0, 1);
+                };
+                this.look_z = function() {
+                    this.gyro.set(
+                        0, 0, 1,
+                        0, 1, 0,
+                        1, 0, 0);
+                };
+                this.reset_pos = function() {
+                    this.position = new THREE.Vector3();
+                };
+                this.reset = function() {
+                    this.reset_pos();
+                    this.look_y();
+	                this.line_color = 0xffffff;
+                };
+                this.reset();
+                this.get_pos = function() {
+                    return this.position.clone();
+                }
+                this.set_pos = function(x, y, z) {
+                    this.position = new THREE.Vector3(x, y, z);
+                }
+                this.get_dir = function() {
+                    return new THREE.Vector3(
+                        this.gyro.elements[0],
+                        this.gyro.elements[1],
+                        this.gyro.elements[2]);
+                }
+                this.add_lines = function(vertices, line_color = this.line_color) {
                     var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
                     var material = new THREE.LineBasicMaterial({ color: line_color });
                     var lines = new THREE.Line(geometry, material);
-                    scene.add(lines);
+                    this.scene.add(lines);
                 }
-                this.add_line = function(pos0, pos1, line_color = 0xffffff) {
+                this.add_line = function(pos0, pos1, line_color = this.line_color) {
                     var points = [];
                     points.push(pos0);
                     points.push(pos1);
                     this.add_lines(points, line_color);
                 }
-                this.add_triangle = function(pos0, pos1, pos2, fill_color = 0xffffff) {
+                this.add_triangle = function(pos0, pos1, pos2, fill_color = this.line_color) {
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(pos0);
                     geometry.vertices.push(pos1);
@@ -42,39 +87,7 @@
                     geometry.faces.push(new THREE.Face3(0, 1, 2));
                     var material = new THREE.MeshBasicMaterial({color: fill_color});
                     var triangle = new THREE.Mesh(geometry, material);
-                    scene.add(triangle);
-                }
-            }
-
-            function Turtle3D(renderer) {
-                this.position = new THREE.Vector3();
-                this.enable_pen = true;
-                this.line_color = 0xffffff;
-                this.renderer = renderer;
-                this.hlu = new THREE.Matrix3();
-                this.reset = function() {
-                    this.position = new THREE.Vector3();
-                    this.hlu.set(
-                        1, 0, 0,
-                        0, 1, 0,
-                        0, 0, 1
-                    );
-                }
-                this.reset();
-                this.lines = [];
-                this.get_pos = function() {
-                    return this.position.clone();
-                }
-                this.set_pos = function(x, y, z) {
-                    this.position.x = x;
-                    this.position.y = y;
-                    this.position.z = z;
-                }
-                this.get_dir = function() {
-                    return new THREE.Vector3(
-                        this.hlu.elements[0],
-                        this.hlu.elements[1],
-                        this.hlu.elements[2]);
+                    this.scene.add(triangle);
                 }
                 this.walk = function(distance) {
                     var dir = this.get_dir();
@@ -82,43 +95,44 @@
                         var pos0 = this.get_pos();
                         this.position.addScaledVector(dir, distance);
                         var pos1 = this.get_pos();
-                        this.renderer.add_line(pos0, pos1, this.line_color);
+                        this.add_line(pos0, pos1, this.line_color);
                     } else {
                         this.position.addScaledVector(dir, distance);
                     }
                 }
-                this.turn = function(angle) {
-                    var rad = deg2rad(angle);
+                this.turn = function(degree) {
+                    var rad = deg2rad(degree);
                     var rot = new THREE.Matrix3();
                     rot.set(
                         Math.cos(rad), -Math.sin(rad), 0,
                         Math.sin(rad), Math.cos(rad), 0,
                         0, 0, 1);
-                    this.hlu.multiply(rot);
+                    this.gyro.multiply(rot);
                 }
-                this.pitch = function(angle) {
-                    var rad = deg2rad(angle);
+                this.pitch = function(degree) {
+                    var rad = deg2rad(degree);
                     var rot = new THREE.Matrix3();
                     rot.set(
                         Math.cos(rad), 0, -Math.sin(rad),
                         0, 1, 0,
                         Math.sin(rad), 0, Math.cos(rad));
-                    this.hlu.multiply(rot);
+                    this.gyro.multiply(rot);
                 }
-                this.bank = function(angle) {
-                    var rad = deg2rad(angle);
+                this.bank = function(degree) {
+                    var rad = deg2rad(degree);
                     var rot = new THREE.Matrix3();
                     rot.set(
                         1, 0, 0,
                         0, Math.cos(rad), -Math.sin(rad),
                         0, Math.sin(rad), Math.cos(rad));
-                    this.hlu.multiply(rot);
+                    this.gyro.multiply(rot);
+                }
+                this.look_back = function() {
+                    this.turn(180);
                 }
             }
 
-            var scene, renderer, camera, controls;
-            var turtle_renderer = new Turtle3DRenderer();
-            var turtle = new Turtle3D(turtle_renderer);
+            var scene, renderer, camera, controls, turtle;
 
             function init() {
                 renderer = new THREE.WebGLRenderer();
@@ -137,6 +151,8 @@
 
                 scene = new THREE.Scene();
                 scene.add(new THREE.AxisHelper(50));
+
+                turtle = new Turtle3D(scene);
             }
             function koch(degree, step) {
                 if (degree == 0) {
@@ -181,14 +197,15 @@
                 turtle.walk(-size);
             }
             function draw() {
-                var dir = turtle.get_dir();
                 turtle.set_pos(0, 0, 0);
+                turtle.look_x();
+                turtle.line_color = 0x00FF00;
                 koch(5, 50);
                 turtle.reset();
-                turtle.pitch(90);
-                turtle.turn(90);
                 turtle.set_pos(0, 0, 0);
-                tree3(12, 40, 5, 40);
+                turtle.look_y();
+                turtle.line_color = 0xFF0000;
+                tree3(10, 40, 8, 40);
             }
             function animate() {
                 controls.update();
