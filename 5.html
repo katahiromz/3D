@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My first three.js app</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <!-- Please download file "three.min.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.min.js -->
+        <script src="./three.min.js"></script>
+        <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
+        <script src="./OrbitControls.js"></script>
+        <script>
+            var rad2deg = function(rad) {
+                return rad * 180.0 / Math.PI;
+            }
+            var deg2rad = function(degree) {
+                return degree * Math.PI / 180.0;
+            }
+
+            function Turtle3DRenderer() {
+                this.add_lines = function(vertices, line_color = 0xffffff) {
+                    var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+                    var material = new THREE.LineBasicMaterial({ color: line_color });
+                    var lines = new THREE.Line(geometry, material);
+                    scene.add(lines);
+                }
+                this.add_line = function(pos0, pos1, line_color = 0xffffff) {
+                    var points = [];
+                    points.push(pos0);
+                    points.push(pos1);
+                    this.add_lines(points, line_color);
+                }
+                this.add_triangle = function(pos0, pos1, pos2, fill_color = 0xffffff) {
+                    var geometry = new THREE.Geometry();
+                    geometry.vertices.push(pos0);
+                    geometry.vertices.push(pos1);
+                    geometry.vertices.push(pos2);
+                    geometry.faces.push(new THREE.Face3(0, 1, 2));
+                    var material = new THREE.MeshBasicMaterial({color: fill_color});
+                    var triangle = new THREE.Mesh(geometry, material);
+                    scene.add(triangle);
+                }
+            }
+
+            function Turtle3D(renderer) {
+                this.position = new THREE.Vector3();
+                this.enable_pen = true;
+                this.line_color = 0xffffff;
+                this.renderer = renderer;
+                this.hlu = new THREE.Matrix3();
+                this.reset = function() {
+                    this.position = new THREE.Vector3();
+                    this.hlu.set(
+                        1, 0, 0,
+                        0, 1, 0,
+                        0, 0, 1
+                    );
+                }
+                this.reset();
+                this.lines = [];
+                this.get_pos = function() {
+                    return this.position.clone();
+                }
+                this.set_pos = function(x, y, z) {
+                    this.position.x = x;
+                    this.position.y = y;
+                    this.position.z = z;
+                }
+                this.get_dir = function() {
+                    return new THREE.Vector3(
+                        this.hlu.elements[0],
+                        this.hlu.elements[1],
+                        this.hlu.elements[2]);
+                }
+                this.walk = function(distance) {
+                    var dir = this.get_dir();
+                    if (this.enable_pen) {
+                        var pos0 = this.get_pos();
+                        this.position.addScaledVector(dir, distance);
+                        var pos1 = this.get_pos();
+                        this.renderer.add_line(pos0, pos1, this.line_color);
+                    } else {
+                        this.position.addScaledVector(dir, distance);
+                    }
+                }
+                this.turn = function(angle) {
+                    var rad = deg2rad(angle);
+                    var rot = new THREE.Matrix3();
+                    rot.set(
+                        Math.cos(rad), -Math.sin(rad), 0,
+                        Math.sin(rad), Math.cos(rad), 0,
+                        0, 0, 1);
+                    this.hlu.multiply(rot);
+                }
+                this.pitch = function(angle) {
+                    var rad = deg2rad(angle);
+                    var rot = new THREE.Matrix3();
+                    rot.set(
+                        Math.cos(rad), 0, -Math.sin(rad),
+                        0, 1, 0,
+                        Math.sin(rad), 0, Math.cos(rad));
+                    this.hlu.multiply(rot);
+                }
+                this.bank = function(angle) {
+                    var rad = deg2rad(angle);
+                    var rot = new THREE.Matrix3();
+                    rot.set(
+                        1, 0, 0,
+                        0, Math.cos(rad), -Math.sin(rad),
+                        0, Math.sin(rad), Math.cos(rad));
+                    this.hlu.multiply(rot);
+                }
+            }
+
+            var scene, renderer, camera, controls;
+            var turtle_renderer = new Turtle3DRenderer();
+            var turtle = new Turtle3D(turtle_renderer);
+
+            function init() {
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                controls.enableZoom = true;
+                controls.autoRotate = true;
+
+                scene = new THREE.Scene();
+                scene.add(new THREE.AxisHelper(50));
+            }
+            function koch(degree, step) {
+                if (degree == 0) {
+                    turtle.walk(step);
+                } else {
+                    koch(degree - 1, step/3);
+                    turtle.turn(60);
+                    koch(degree - 1, step/3);
+                    turtle.turn(-120);
+                    koch(degree - 1, step/3);
+                    turtle.turn(60);
+                    koch(degree - 1, step/3);
+                }
+            }
+            function tree(size, angle, depth) {
+                if (depth == 0)
+                    return;
+                turtle.walk(size);
+                turtle.turn(angle);
+                tree(size * 0.75, angle, depth - 1);
+                turtle.turn(-2 * angle);
+                tree(size * 0.75, angle, depth - 1);
+                turtle.turn(angle);
+                turtle.walk(-size);
+            }
+            function tree3(size, angle1, depth, angle2=0) {
+                if (depth == 0)
+	                return;
+                turtle.walk(size);
+                turtle.pitch(angle2);
+                tree3(size * 0.75, angle1, depth - 1, angle2);
+                turtle.pitch(-angle2);
+                turtle.bank(120);
+                turtle.pitch(angle2);
+                tree3(size * 0.75, angle1, depth - 1, angle2);
+                turtle.pitch(-angle2);
+                turtle.bank(-240);
+                turtle.pitch(angle2);
+                tree3(size * 0.75, angle1, depth - 1, angle2);
+                turtle.pitch(-angle2);
+                turtle.bank(120);
+                turtle.walk(-size);
+            }
+            function draw() {
+                var dir = turtle.get_dir();
+                turtle.set_pos(0, 0, 0);
+                koch(5, 50);
+                turtle.reset();
+                turtle.pitch(90);
+                turtle.turn(90);
+                turtle.set_pos(0, 0, 0);
+                tree3(12, 40, 5, 40);
+            }
+            function animate() {
+                controls.update();
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            init();
+            draw();
+            animate();
+        </script>
+    </body>
+</html>
