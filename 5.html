@@ -62,8 +62,8 @@
                 this.reset = function() {
                     this.reset_pos();
                     this.look_y();
-	                this.line_color = 0xffffff;
-	                this.fill_color = 0x888888;
+                    this.line_color = 0xffffff;
+                    this.fill_color = 0x888888;
                 };
                 this.reset();
 
@@ -137,7 +137,7 @@
                 }
 
                 // 亀の進行方向を軸として反時計回りにangle度曲がる関数。マイナスは時計回り。
-                this.bank = function(angle) {
+                this.spin = function(angle) {
                     var rad = deg2rad(angle);
                     var rot = new THREE.Matrix3();
                     rot.set(
@@ -220,20 +220,20 @@
             // 三脚のように三方向に分かれる木構造を描画する。
             function tree3(size, depth, angle) {
                 if (depth == 0)
-	                return;
+                    return;
                 turtle.walk(size);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
                 turtle.pitch(-angle);
-                turtle.bank(120);
+                turtle.spin(120);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
                 turtle.pitch(-angle);
-                turtle.bank(-240);
+                turtle.spin(-240);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
                 turtle.pitch(-angle);
-                turtle.bank(120);
+                turtle.spin(120);
                 turtle.walk(-size);
             }
 
