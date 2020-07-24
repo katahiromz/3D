@@ -74,6 +74,7 @@
                 if (depth == 0)
                     return;
                 var pg = turtle.get_pg();
+                turtle.line_width = size / 15;
                 turtle.walk(size);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);

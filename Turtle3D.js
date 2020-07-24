@@ -3,6 +3,7 @@ function Turtle3D(scene) {
     this.scene = scene;
     this.position = new THREE.Vector3();
     this.enable_pen = true;
+    this.line_width = 0;
     this.line_color = 0xffffff;
     this.fill_color = 0x888888;
     this.gyro = new THREE.Matrix3();
@@ -48,6 +49,7 @@ function Turtle3D(scene) {
         this.look_y();
         this.line_color = 0xffffff;
         this.fill_color = 0x888888;
+        this.line_width = 0;
     };
     this.reset();
 
@@ -81,17 +83,23 @@ function Turtle3D(scene) {
     }
 
     // 線を追加する関数。
-    this.add_lines = function(vertices, line_color = this.line_color) {
-        var geometry = new THREE.BufferGeometry().setFromPoints(vertices);
-        var material = new THREE.LineBasicMaterial({ color: line_color });
-        var lines = new THREE.Line(geometry, material);
-        this.scene.add(lines);
-    }
-    this.add_line = function(pos0, pos1, line_color = this.line_color) {
-        var points = [];
-        points.push(pos0);
-        points.push(pos1);
-        this.add_lines(points, line_color);
+    this.add_line = function(pos0, pos1, line_width = this.line_width, line_color = this.line_color) {
+        if (line_width == 0) {
+            var points = [];
+            points.push(pos0);
+            points.push(pos1);
+            var geometry = new THREE.BufferGeometry().setFromPoints(points);
+            var material = new THREE.LineBasicMaterial({ color: line_color });
+            var lines = new THREE.Line(geometry, material);
+            this.scene.add(lines);
+        } else {
+            var segments = 1, radiusSegments = 3;
+            var pointsArray = new THREE.LineCurve3(pos0, pos1);
+            var geometry = new THREE.TubeGeometry(pointsArray, segments, line_width, radiusSegments, false, true);
+            var material = new THREE.MeshBasicMaterial( { color: line_color } );
+            var lines = new THREE.Mesh(geometry, material);
+            this.scene.add(lines);
+        }
     }
     // 三角形を追加する関数。
     this.add_triangle = function(pos0, pos1, pos2, fill_color = this.fill_color) {
@@ -112,7 +120,7 @@ function Turtle3D(scene) {
             var pos0 = this.get_pos();
             this.position.addScaledVector(dir, distance);
             var pos1 = this.get_pos();
-            this.add_line(pos0, pos1, this.line_color);
+            this.add_line(pos0, pos1);
         } else {
             this.position.addScaledVector(dir, distance);
         }
