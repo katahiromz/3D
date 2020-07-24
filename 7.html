@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My three.js app</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <!-- Please download file "three.min.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/build/three.min.js -->
+        <script src="./three.min.js"></script>
+        <!-- Please download file "OrbitControls.js" from https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/controls/OrbitControls.js -->
+        <script src="./OrbitControls.js"></script>
+        <!-- 三次元タートルグラフィックス -->
+        <script src="./Turtle3D.js"></script>
+        <script>
+            // グローバル変数。
+            var scene, renderer, camera, controls, turtle;
+
+            // 全体の初期化処理。
+            function init() {
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                controls.enableZoom = true;
+                controls.autoRotate = true;
+
+                scene = new THREE.Scene();
+                scene.add(new THREE.AxisHelper(50));
+
+                turtle = new Turtle3D(scene);
+            }
+
+            // コッホ曲線を描画する。
+            function koch(level, step) {
+                if (level == 0) {
+                    turtle.walk(step);
+                } else {
+                    koch(level - 1, step/3);
+                    turtle.pitch(-60);
+                    koch(level - 1, step/3);
+                    turtle.pitch(120);
+                    koch(level - 1, step/3);
+                    turtle.pitch(-60);
+                    koch(level - 1, step/3);
+                }
+            }
+
+            // 二次元の木構造を描画する。
+            function tree(size, depth, angle) {
+                if (depth == 0)
+                    return;
+                var pg = turtle.get_pg();
+                turtle.walk(size);
+                turtle.turn(angle);
+                tree(size * 0.75, depth - 1, angle);
+                turtle.turn(-2.0 * angle);
+                tree(size * 0.75, depth - 1, angle);
+                turtle.set_pg(pg);
+            }
+
+            // 三脚のように三方向に分かれる木構造を描画する。
+            function tree3(size, depth, angle) {
+                if (depth == 0) {
+                    turtle.add_sphere(0.5, turtle.get_pos(), 0xFFFFFF);
+                    return;
+                }
+                var pg = turtle.get_pg();
+                turtle.line_width = size / 5;
+                turtle.walk(size);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle);
+                turtle.spin(120);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle);
+                turtle.spin(-240);
+                turtle.pitch(angle);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.set_pg(pg);
+            }
+
+            // 肺臓を描画する関数。
+            function lung(size, depth, angle) {
+                var pg = turtle.get_pg();
+                turtle.line_width = size / 5;
+                turtle.spin(90);
+                turtle.walk(size);
+                turtle.pitch(angle * 1.2);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.pitch(-angle * 1.2);
+                turtle.spin(180);
+                turtle.pitch(angle * 1.2);
+                tree3(size * 0.75, depth - 1, angle);
+                turtle.set_pg(pg);
+            }
+
+            // 全体の描画処理。
+            function draw() {
+                //turtle.reset();
+                //turtle.look_x();
+                //turtle.line_color = 0x00FF00;
+                //koch(5, 50);
+
+                //turtle.reset();
+                //turtle.look_y();
+                //turtle.line_color = 0xFF0000;
+                //tree(7, 8, 30);
+
+                turtle.reset();
+                turtle.look_y();
+                turtle.line_color = 0xFFCC00;
+                lung(10, 8, 50);
+
+                //turtle.reset();
+                //turtle.look_y();
+                //turtle.walk(20);
+                //turtle.turn(90);
+                //turtle.walk(20);
+            }
+
+            // 全体のアニメーション処理。
+            function animate() {
+                controls.update();
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            init();
+            draw();
+            animate();
+        </script>
+    </body>
+</html>
