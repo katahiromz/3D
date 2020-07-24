@@ -4,8 +4,8 @@ function Turtle3D(scene) {
     this.position = new THREE.Vector3();
     this.enable_pen = true;
     this.line_width = 0;
-    this.line_color = 0xffffff;
-    this.fill_color = 0x888888;
+    this.line_color = 0xFFFFFF;
+    this.fill_color = 0xFFFFFF;
     this.gyro = new THREE.Matrix3();
 
     // ラジアンから度へ変換する関数。
@@ -47,8 +47,8 @@ function Turtle3D(scene) {
     this.reset = function() {
         this.reset_pos();
         this.look_y();
-        this.line_color = 0xffffff;
-        this.fill_color = 0x888888;
+        this.line_color = 0xFFFFFF;
+        this.fill_color = 0xFFFFFF;
         this.line_width = 0;
     };
     this.reset();
@@ -111,6 +111,14 @@ function Turtle3D(scene) {
         var material = new THREE.MeshBasicMaterial({color: fill_color});
         var triangle = new THREE.Mesh(geometry, material);
         this.scene.add(triangle);
+    }
+    // 球体を追加する関数。
+    this.add_sphere = function(radius, pos = this.get_pos(), fill_color = this.fill_color) {
+        var geometry = new THREE.SphereGeometry(radius, 4, 4);
+        var material = new THREE.MeshBasicMaterial({color: fill_color});
+        var sphere = new THREE.Mesh(geometry, material);
+        sphere.position.add(pos);
+        this.scene.add(sphere);
     }
 
     // 長さdistanceだけ前進する。enable_penがtrueなら線を描画する。
