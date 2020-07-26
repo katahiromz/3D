@@ -78,8 +78,8 @@ function Turtle3D(scene) {
         return [this.get_pos(), this.get_gyro()];
     }
     this.set_pg = function(pg) {
-        this.position = pg[0];
-        this.gyro = pg[1];
+        this.position = pg[0].clone();
+        this.gyro = pg[1].clone();
     }
 
     // 線を追加する関数。
@@ -93,7 +93,7 @@ function Turtle3D(scene) {
             var lines = new THREE.Line(geometry, material);
             this.scene.add(lines);
         } else {
-            var segments = 1, radiusSegments = 3;
+            var segments = 1, radiusSegments = 5;
             var pointsArray = new THREE.LineCurve3(pos0, pos1);
             var geometry = new THREE.TubeGeometry(pointsArray, segments, line_width, radiusSegments, false, true);
             var material = new THREE.MeshBasicMaterial( { color: line_color } );
@@ -114,7 +114,7 @@ function Turtle3D(scene) {
     }
     // 球体を追加する関数。
     this.add_sphere = function(radius, pos = this.get_pos(), fill_color = this.fill_color) {
-        var geometry = new THREE.SphereGeometry(radius, 4, 4);
+        var geometry = new THREE.SphereGeometry(radius, 6, 6);
         var material = new THREE.MeshBasicMaterial({color: fill_color});
         var sphere = new THREE.Mesh(geometry, material);
         sphere.position.add(pos);
