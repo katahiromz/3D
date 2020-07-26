@@ -95,7 +95,7 @@ function Turtle3D(scene) {
         } else {
             var segments = 1, radiusSegments = 5;
             var pointsArray = new THREE.LineCurve3(pos0, pos1);
-            var geometry = new THREE.TubeGeometry(pointsArray, segments, line_width, radiusSegments, false, true);
+            var geometry = new THREE.TubeGeometry(pointsArray, segments, line_width, radiusSegments, false);
             var material = new THREE.MeshBasicMaterial( { color: line_color } );
             var lines = new THREE.Mesh(geometry, material);
             this.scene.add(lines);
