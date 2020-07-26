@@ -49,7 +49,7 @@
                     return;
                 }
 
-                // 3回再帰して枝分かれを描画する。
+                // 3回再帰して三脚のような枝分かれを描画する。
                 var pg = turtle.get_pg(); // 位置と向きを保存。
                 turtle.line_width = size / 5;
                 turtle.line_color = 0xFFCC00; // 黄色
@@ -138,7 +138,7 @@
 
             // 肺臓を描画する関数。
             function lung(size, depth, angle) {
-                // 2回再帰して枝分かれを描画する。
+                // 2回再帰して二股の枝分かれを描画する。
                 var pg = turtle.get_pg(); // 位置と向きを保存する。
                 turtle.line_width = size / 5;
                 turtle.line_color = 0xFFCC00; // 黄色
