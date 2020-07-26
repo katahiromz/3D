@@ -62,6 +62,7 @@
                 turtle.spin(-240);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
+                var pg2 = turtle.get_pg();
                 turtle.set_pg(pg);
 
                 turtle.line_width = size / 20;
@@ -91,7 +92,7 @@
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
                 turtle.walk(-size / 20 * 2, false);
-                var pg2 = turtle.get_pg();
+                pg2 = turtle.get_pg();
 
                 turtle.turn(90);
                 turtle.walk(-size / 20, false);
@@ -145,22 +146,7 @@
                 turtle.spin(180);
                 turtle.pitch(angle * 1.2);
                 tree3(size * 0.75, depth - 1, angle);
-                turtle.set_pg(pg);
-
-                turtle.line_width = size / 20;
-                turtle.line_color = 0xFF0000;
-                turtle.pitch(90);
-                turtle.walk(-(size / 20 + size / 5), false);
-                turtle.pitch(-90);
-                turtle.walk(size);
-                turtle.set_pg(pg);
-
-                turtle.line_width = size / 20;
-                turtle.line_color = 0x0000FF;
-                turtle.pitch(90);
-                turtle.walk((size / 20 + size / 5), false);
-                turtle.pitch(-90);
-                turtle.walk(size);
+                var pg2 = turtle.get_pg();
                 turtle.set_pg(pg);
 
                 turtle.line_width = size / 20;
@@ -190,7 +176,7 @@
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
                 turtle.walk(-size / 20 * 2, false);
-                var pg2 = turtle.get_pg();
+                pg2 = turtle.get_pg();
 
                 turtle.turn(90);
                 turtle.walk(-size / 20, false);
