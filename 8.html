@@ -44,13 +44,15 @@
             // 三脚のように三方向に分かれる木構造を描画する。
             function tree3(size, depth, angle) {
                 if (depth == 0) {
+                    // 白い球体
                     turtle.add_sphere(0.5, turtle.get_pos(), 0xFFFFFF);
                     return;
                 }
 
-                var pg = turtle.get_pg();
+                // 3回再帰して枝分かれを描画する。
+                var pg = turtle.get_pg(); // 位置と向きを保存。
                 turtle.line_width = size / 5;
-                turtle.line_color = 0xFFCC00;
+                turtle.line_color = 0xFFCC00; // 黄色
                 turtle.walk(size);
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
@@ -63,16 +65,18 @@
                 turtle.pitch(angle);
                 tree3(size * 0.75, depth - 1, angle);
                 var pg2 = turtle.get_pg();
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元。
 
+                // 青色の血管を描画する。
                 turtle.line_width = size / 20;
-                turtle.line_color = 0x0000FF;
+                turtle.line_color = 0x0000FF;   // 青色
                 turtle.pitch(90);
                 turtle.walk(-(size / 5 + size / 20), false);
                 turtle.pitch(-90);
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
 
+                // 三脚の分岐点の上に青色の描画する。
                 turtle.pitch(12);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 5.0);
@@ -82,8 +86,9 @@
                 turtle.pitch(45);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 5.0);
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元。
 
+                // 赤色の血管を描画する。
                 turtle.line_width = size / 20;
                 turtle.line_color = 0xFF0000;
                 turtle.pitch(90);
@@ -92,8 +97,9 @@
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
                 turtle.walk(-size / 20 * 2, false);
-                pg2 = turtle.get_pg();
+                pg2 = turtle.get_pg(); // 位置と向きを保存。
 
+                // 赤色の血管の左側のう回路を描画する。
                 turtle.turn(90);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
@@ -109,10 +115,9 @@
                 turtle.pitch(-30);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
-                turtle.pitch(-10);
-                turtle.walk(size / 20);
-                turtle.set_pg(pg2);
+                turtle.set_pg(pg2); // 位置と向きを復元。
 
+                // 赤色の血管の右側のう回路を描画する。
                 turtle.turn(-90);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
@@ -128,16 +133,15 @@
                 turtle.pitch(-30);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
-                turtle.pitch(-10);
-                turtle.walk(size / 20);
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元。
             }
 
             // 肺臓を描画する関数。
             function lung(size, depth, angle) {
-                var pg = turtle.get_pg();
+                // 2回再帰して枝分かれを描画する。
+                var pg = turtle.get_pg(); // 位置と向きを保存する。
                 turtle.line_width = size / 5;
-                turtle.line_color = 0xFFCC00;
+                turtle.line_color = 0xFFCC00; // 黄色
                 turtle.spin(90);
                 turtle.walk(size);
                 turtle.pitch(angle * 1.2);
@@ -147,16 +151,18 @@
                 turtle.pitch(angle * 1.2);
                 tree3(size * 0.75, depth - 1, angle);
                 var pg2 = turtle.get_pg();
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元する。
 
+                // 青色の血管を描画する。
                 turtle.line_width = size / 20;
-                turtle.line_color = 0x0000FF;
+                turtle.line_color = 0x0000FF; // 青色
                 turtle.pitch(90);
                 turtle.walk(-(size / 5 + size / 20), false);
                 turtle.pitch(-90);
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
-
+                
+                // 三脚の分岐点の上に青色の描画する。
                 turtle.pitch(12);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 5.0);
@@ -166,18 +172,20 @@
                 turtle.pitch(45);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 5.0);
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元。
 
+                // 赤色の血管を描画する。
                 turtle.line_width = size / 20;
-                turtle.line_color = 0xFF0000;
+                turtle.line_color = 0xFF0000; // 赤色
                 turtle.pitch(90);
                 turtle.walk((size / 5 + size / 20), false);
                 turtle.pitch(-90);
                 turtle.walk(size / 20 / 2, false);
                 turtle.walk(size - size / 20 / 2);
                 turtle.walk(-size / 20 * 2, false);
-                pg2 = turtle.get_pg();
+                pg2 = turtle.get_pg(); // 位置と向きを保存する。
 
+                // 赤色の血管の左側のう回路を描画する。
                 turtle.turn(90);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
@@ -193,10 +201,9 @@
                 turtle.pitch(-30);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
-                turtle.pitch(-10);
-                turtle.walk(size / 20);
-                turtle.set_pg(pg2);
+                turtle.set_pg(pg2); // 位置と向きを復元。
 
+                // 赤色の血管の右側のう回路を描画する。
                 turtle.turn(-90);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
@@ -212,16 +219,14 @@
                 turtle.pitch(-30);
                 turtle.walk(-size / 20, false);
                 turtle.walk(size / 6.5);
-                turtle.pitch(-10);
-                turtle.walk(size / 20);
-                turtle.set_pg(pg);
+                turtle.set_pg(pg); // 位置と向きを復元。
             }
 
             // 全体の描画処理。
             function draw() {
                 turtle.reset();
                 turtle.look_y();
-                lung(10, 8, 50);
+                lung(10, 7, 50);
                 //tree3(10, 2, 50 * 1.2);
             }
 
