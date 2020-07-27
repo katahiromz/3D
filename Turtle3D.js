@@ -90,15 +90,25 @@ function Turtle3D(scene) {
             points.push(pos1);
             var geometry = new THREE.BufferGeometry().setFromPoints(points);
             var material = new THREE.LineBasicMaterial({ color: line_color });
-            var lines = new THREE.Line(geometry, material);
-            this.scene.add(lines);
+            var line = new THREE.Line(geometry, material);
+            this.scene.add(line);
         } else {
-            var segments = 1, radiusSegments = 5;
-            var pointsArray = new THREE.LineCurve3(pos0, pos1);
-            var geometry = new THREE.TubeGeometry(pointsArray, segments, line_width, radiusSegments, false);
-            var material = new THREE.MeshBasicMaterial( { color: line_color } );
-            var lines = new THREE.Mesh(geometry, material);
-            this.scene.add(lines);
+            var direction = new THREE.Vector3().subVectors(pos1, pos0);
+            var orientation = new THREE.Matrix4();
+            orientation.lookAt(pos0, pos1, new THREE.Object3D().up);
+            orientation.multiply(new THREE.Matrix4().set(
+                1, 0, 0, 0,
+                0, 0, 1, 0,
+                0, -1, 0, 0,
+                0, 0, 0, 1));
+            var geometry = new THREE.CylinderGeometry(line_width, line_width, direction.length(), 6, 1);
+            var material = new THREE.MeshBasicMaterial({ color: line_color });
+            var line = new THREE.Mesh(geometry, material);
+            line.applyMatrix(orientation);
+            line.position.x = (pos0.x + pos1.x) / 2;
+            line.position.y = (pos0.y + pos1.y) / 2;
+            line.position.z = (pos0.z + pos1.z) / 2;
+            this.scene.add(line);
         }
     }
     // 三角形を追加する関数。
