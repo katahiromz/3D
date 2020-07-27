@@ -84,7 +84,7 @@ function Turtle3D(scene) {
 
     // 線を追加する関数。
     this.add_line = function(pos0, pos1, line_width = this.line_width, line_color = this.line_color) {
-        if (line_width == 0) {
+        if (line_width <= 0) {
             var points = [];
             points.push(pos0);
             points.push(pos1);
